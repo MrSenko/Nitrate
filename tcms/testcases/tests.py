@@ -50,7 +50,7 @@ class CaseTests(unittest.TestCase):
         location = '/case/%s' % self.case_id
         response = self.c.get(location)
         if response.status_code == 301:
-            print response.path
+            print response.url
         try:
             self.assertEquals(response.status_code, 200)
         except AssertionError:
@@ -133,11 +133,11 @@ class Test_MultipleEmailField(unittest.TestCase):
             '', ' cqi@redhat.com', 'chen@sina.com', )
 
     def test_to_python(self):
-        value = 'cqi@redhat.com'
+        value = u'cqi@redhat.com'
         pyobj = self.field.to_python(value)
         self.assertEqual(pyobj, ['cqi@redhat.com'])
 
-        value = 'cqi@redhat.com,,cqi@gmail.com,'
+        value = u'cqi@redhat.com,,cqi@gmail.com,'
         pyobj = self.field.to_python(value)
         self.assertEqual(pyobj, ['cqi@redhat.com', 'cqi@gmail.com'])
 
@@ -146,15 +146,15 @@ class Test_MultipleEmailField(unittest.TestCase):
             self.assertEqual(pyobj, [])
 
     def test_clean(self):
-        value = 'cqi@redhat.com'
+        value = u'cqi@redhat.com'
         data = self.field.clean(value)
         self.assertEqual(data, ['cqi@redhat.com'])
 
-        value = 'cqi@redhat.com,cqi@gmail.com'
+        value = u'cqi@redhat.com,cqi@gmail.com'
         data = self.field.clean(value)
         self.assertEqual(data, ['cqi@redhat.com', 'cqi@gmail.com'])
 
-        value = ',cqi@redhat.com, ,cqi@gmail.com, \n'
+        value = u',cqi@redhat.com, ,cqi@gmail.com, \n'
         data = self.field.clean(value)
         self.assertEqual(data, ['cqi@redhat.com', 'cqi@gmail.com'])
 
