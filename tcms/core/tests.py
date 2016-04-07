@@ -8,7 +8,9 @@ from django_nose.testcases import FastFixtureTestCase
 from tcms.core import responses
 from tcms.core.db import GroupByResult
 from tcms.core.utils import string_to_list
-from tcms.testcases.models import TestCase
+from django.contrib.auth.models import User
+from tcms.management.models import Priority
+from tcms.testcases.models import TestCase, TestCaseCategory, TestCaseStatus
 
 
 class TestUtilsFunctions(unittest.TestCase):
@@ -57,10 +59,32 @@ class TestUtilsXmlrpc(FastFixtureTestCase):
     fixtures = ['unittest.json']
 
     def setUp(self):
-        self.testcase_with_default_tester_null = TestCase.objects.extra(
-            where=['default_tester_id is null'])[0:1].get()
-        self.testcase_with_default_tester_0 = TestCase.objects.extra(
-            where=['default_tester_id = 0'])[0:1].get()
+        self.first_user = User.objects.all()[0]
+
+        self.testcase_with_default_tester_null = TestCase.objects.filter(
+            default_tester__isnull=True)[0:1].get()
+
+        # create a TestCase with default_tester linking to
+        # a User object that DOESN'T exist!
+        TestCase(
+            author=self.first_user,
+            default_tester_id=0,
+            case_status=TestCaseStatus.objects.all()[0],
+            category=TestCaseCategory.objects.all()[0],
+            priority=Priority.objects.all()[0]
+        ).save()
+        self.testcase_with_default_tester_0 = TestCase.objects.filter(
+            default_tester_id=0)[0:1].get()
+
+        # create a TestCase with default_tester linking to
+        # a User object that DOES exist!
+        TestCase(
+            author=self.first_user,
+            default_tester=self.first_user,
+            case_status=TestCaseStatus.objects.all()[0],
+            category=TestCaseCategory.objects.all()[0],
+            priority=Priority.objects.all()[0]
+        ).save()
         self.testcase_with_valid_default_tester = TestCase.objects.filter(
             default_tester__isnull=False)[0:1].get()
 
@@ -87,8 +111,8 @@ class TestUtilsXmlrpc(FastFixtureTestCase):
 
         s = XMLRPCSerializer(model=self.testcase_with_valid_default_tester)
         result = s.serialize_model()
-        self.assertNotEqual(result['default_tester'], None)
-        self.assertNotEqual(result['default_tester_id'], None)
+        self.assertEqual(result['default_tester'], self.first_user.username)
+        self.assertEqual(result['default_tester_id'], self.first_user.pk)
 
 
 class GroupByResultDictLikeTest(TestCase):
