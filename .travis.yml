@@ -32,7 +32,9 @@ before_install:
   - psql -c  "CREATE DATABASE nitrate_travis ENCODING 'UTF8' LC_COLLATE = 'en_US.UTF-8' LC_CTYPE = 'en_US.UTF-8';" -U postgres
   - pip install coveralls psycopg2
 install: "pip install -r requirements/devel.txt"
-script: make check
+script:
+  - ./manage.py migrate
+  - ./manage.py migrate
 after_success:
   - coveralls
 notifications:

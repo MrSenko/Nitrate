@@ -51,5 +51,6 @@ class Migration(migrations.Migration):
         # Note: SQLite doesn't support the ALTER/MODIFY COLUMN statement so
         # we can't use RawSQL here!
         operations = [
-            DjangoCommentsAlterField('comment', 'object_pk', models.IntegerField())
+#            DjangoCommentsAlterField('comment', 'object_pk', models.IntegerField())
+            migrations.RunSQL('ALTER TABLE django_comments MODIFY object_pk INT NOT NULL;')
         ]
