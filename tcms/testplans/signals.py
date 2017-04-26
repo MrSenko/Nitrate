@@ -11,6 +11,9 @@ def on_plan_save(sender, instance, created=False, **kwargs):
 
 
 def on_plan_delete(sender, instance, **kwargs):
+    from tcms.testplans.models import TestPlanEmailSettings
+    print "*************", TestPlanEmailSettings.objects.count()
+
     # email this deletion
     if instance.emailing.notify_on_plan_delete:
         email.email_plan_deletion(instance)
